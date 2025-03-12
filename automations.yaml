@@ -162,6 +162,53 @@
         action: light.turn_on
   mode: single
 
+- id: turn_off_entrance_light_panel
+  alias: Turn Off Entrance Light Panel
+  description: Turn off entrance light panel.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_hallway
+    from: 'on'
+    to: 'off'
+    for:
+      seconds: 40
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+  action:
+  - service: light.turn_off
+    target:
+      entity_id: light.entrace_light_panel
+    data:
+      transition: 2
+  mode: single
+- id: turn_on_entrance_light_panel
+  alias: Turn On Entrance Light Panel
+  description: Turn on entrance light panel.
+  triggers:
+  - entity_id:
+    - binary_sensor.presence_sensor_hallway
+    from: 'off'
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: sun
+    before: sunrise
+    after: sunset
+  actions:
+  - target:
+      entity_id: light.entrace_light_panel
+    data:
+      transition: 2
+      brightness_pct: '{% if is_state(''input_select.user_mode'', ''Guest'') %}{{
+        states(''input_number.guest_brightness'') | int }}{% else %}{{ states(''input_number.regular_brightness'')
+        | int }}{% endif %}'
+      color_temp: '{% if is_state(''input_select.light_color_mode'', ''White'') %}153{%
+        else %}400{% endif %}'
+    action: light.turn_on
+  mode: single
+- id: set_lights_to_white_orange
   alias: Set Lights to White/Orange
   description: Set lights to white or orange based on the input select.
   trigger:
@@ -368,6 +415,7 @@
       media_content_id: /local/azaan/azaan.mp3
       media_content_type: music
   id: fb8ad06e366f479486003cfc7a04d1b5
+- alias: Test Azan
   trigger:
   - platform: state
     entity_id: input_boolean.test_azan
