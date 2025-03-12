@@ -102,7 +102,7 @@
         data:
           brightness_pct: 100
           transition: 2
-          color_temp: 400
+          color_temp: 153
     - conditions:
       - condition: state
         entity_id: binary_sensor.presence_sensor_dining
@@ -116,7 +116,7 @@
         data:
           brightness_pct: 50
           transition: 2
-          color_temp: 400
+          color_temp: 153
   mode: single
 - id: adjust_light_brightness_kitchen_presence
   alias: Adjust Light Brightness Based on Kitchen Presence
@@ -146,7 +146,7 @@
         data:
           brightness_pct: 100
           transition: 2
-          color_temp: 400
+          color_temp: 153
         action: light.turn_on
     - conditions:
       - condition: state
@@ -158,7 +158,7 @@
         data:
           brightness_pct: 50
           transition: 2
-          color_temp: 400
+          color_temp: 153
         action: light.turn_on
   mode: single
 
@@ -171,7 +171,7 @@
     from: 'on'
     to: 'off'
     for:
-      seconds: 40
+      seconds: 20
   condition:
   - condition: sun
     before: sunrise
@@ -201,11 +201,8 @@
       entity_id: light.entrace_light_panel
     data:
       transition: 2
-      brightness_pct: '{% if is_state(''input_select.user_mode'', ''Guest'') %}{{
-        states(''input_number.guest_brightness'') | int }}{% else %}{{ states(''input_number.regular_brightness'')
-        | int }}{% endif %}'
-      color_temp: '{% if is_state(''input_select.light_color_mode'', ''White'') %}153{%
-        else %}400{% endif %}'
+      brightness_pct: 100
+      color_temp: 153
     action: light.turn_on
   mode: single
 - id: set_lights_to_white_orange
@@ -225,7 +222,7 @@
         target:
           entity_id: group.countertopLights
         data:
-          color_temp: 400
+          color_temp: 153
           brightness: 100
       - delay: 00:00:02
       - service: light.turn_on
@@ -234,7 +231,7 @@
           - group.diningLights
           - group.fridgeAreaLights
         data:
-          color_temp: 400
+          color_temp: 153
           brightness: 100
       - delay: 00:00:02
     - conditions:
@@ -246,7 +243,7 @@
         target:
           entity_id: group.countertopLights
         data:
-          color_temp: 400
+          color_temp: 153
           brightness: 100
       - delay: 00:00:02
       - service: light.turn_on
@@ -255,7 +252,7 @@
           - group.diningLights
           - group.fridgeAreaLights
         data:
-          color_temp: 400
+          color_temp: 153
           brightness: 100
       - delay: 00:00:02
   mode: single
@@ -451,7 +448,7 @@
     data:
       transition: 2
       brightness_pct: 100
-      color_temp: 400
+      color_temp: 153
     action: light.turn_on
   - action: notify.persistent_notification
     metadata: {}
@@ -486,5 +483,5 @@
     data:
       brightness_pct: 50
       transition: 2
-      color_temp: 400
+      color_temp: 153
   mode: single
