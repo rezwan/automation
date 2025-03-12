@@ -458,6 +458,7 @@
     data:
       message: Someone at the door
   mode: single
+
 - id: turn_on_kitchen_countertop_lights_on_presence
   alias: Turn On Kitchen and Countertop Lights on Presence
   description: Turns on the kitchen and countertop lights to 50% brightness if the dining presence sensor detects occupancy, the time is before sunrise and after sunset, and the user mode is not "Alert".
@@ -472,7 +473,7 @@
     after: sunset
   - condition: state
     entity_id: input_select.user_mode
-    state_not: Alert
+    state: Regular
   - condition: state
     entity_id: group.countertopLights, group.diningLights
     state: 'off'
@@ -485,4 +486,5 @@
     data:
       brightness_pct: 50
       transition: 2
+      color_temp: 400
   mode: single
