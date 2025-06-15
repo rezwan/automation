@@ -1,0 +1,529 @@
+- id: close_blinds_remote
+  alias: Close Blinds with Remote
+  description: Closes the blinds when the remote button is short pressed.
+  trigger:
+  - device_id: 8e45d0e26a5c7cdac0dc3e67dae770c2
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: close
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: group.livingblinds
+  mode: single
+- id: open_blinds_remote
+  alias: Open Blinds with Remote
+  description: Opens the blinds when the remote button is short pressed.
+  trigger:
+  - device_id: 8e45d0e26a5c7cdac0dc3e67dae770c2
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: open
+  action:
+  - service: cover.open_cover
+    target:
+      entity_id: group.livingblinds
+  mode: single
+- id: open_blinds_sunrise
+  alias: Open Blinds On Sunrise
+  description: Opens all blinds one hour after sunrise.
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 01:00:00
+  action:
+  - service: cover.open_cover
+    target:
+      entity_id: group.livingblinds
+  mode: single
+- id: close_blinds_sunset
+  alias: Close Blinds One Hour Before Sunset
+  description: Closes all blinds one hour before sunset.
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -01:00:00
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: group.livingblinds
+  mode: single
+- id: turn_off_kitchen_dining_lights_no_occupancy
+  alias: Turn Off Countertop Lights If No Occupancy in Kitchen Dining
+  description: Turns off the countertop lights if no occupancy is detected in the
+    kitchen dining area after sunset.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_kitchen_dining
+    to: 'off'
+    for:
+      seconds: 10
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -01:00:00
+  action:
+  - service: light.turn_off
+    target:
+      entity_id:
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
+    data:
+      transition: 3
+  mode: single
+- id: adjust_dining_fridgearea_brightness_based_on_presence
+  alias: Adjust Dining and Fridge Area Brightness Based on Dining Presence
+  description: Adjusts the brightness of the dining and fridge area lights based on
+    presence detected in the dining area.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_dining
+  condition:
+  - condition: or
+    conditions:
+    - condition: sun
+      before: sunrise
+      after: sunset
+      after_offset: -01:00:00
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.presence_sensor_dining
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+          - group.dininglights
+          - group.fridgearealights
+        data:
+          brightness: 255
+          transition: 2
+          color_temp: 153
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.presence_sensor_dining
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+          - group.dininglights
+          - group.fridgearealights
+        data:
+          brightness: 170
+          transition: 2
+          color_temp: 153
+  mode: single
+- id: adjust_light_brightness_kitchen_presence
+  alias: Adjust Light Brightness Based on Kitchen Presence
+  description: Adjusts the brightness of the lights based on presence in the kitchen
+    and hallway.
+  triggers:
+  - entity_id: binary_sensor.presence_sensor_cookingarea
+    trigger: state
+  conditions:
+  - condition: or
+    conditions:
+    - condition: sun
+      before: sunrise
+      after: sunset
+      after_offset: -01:00:00
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.presence_sensor_cookingarea
+        state: 'on'
+      sequence:
+      - target:
+          entity_id:
+          - light.countertop_light1
+          - light.countertop_light2
+          - light.countertop_light3
+          - light.countertop_light4
+        data:
+          transition: 2
+          rgb_color:
+          - 255
+          - 214
+          - 170
+          brightness_pct: 100
+          color_temp_kelvin: 6500
+        action: light.turn_on
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.presence_sensor_cookingarea
+        state: 'off'
+      sequence:
+      - target:
+          entity_id:
+          - light.countertop_light1
+          - light.countertop_light2
+          - light.countertop_light3
+          - light.countertop_light4
+        data:
+          transition: 2
+          rgb_color:
+          - 255
+          - 214
+          - 170
+          brightness_pct: 50
+        action: light.turn_on
+  mode: single
+- id: turn_off_entrance_light_panel
+  alias: Turn Off Entrance Light Panel
+  description: Turn off entrance light panel.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_hallway
+    from: 'on'
+    to: 'off'
+    for:
+      seconds: 20
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -01:00:00
+  action:
+  - service: light.turn_off
+    target:
+      entity_id: light.entrance_light_panel
+    data:
+      transition: 2
+  mode: single
+- id: turn_on_entrance_light_panel
+  alias: Turn On Entrance Light Panel
+  description: Turn on entrance light panel.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_hallway
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -01:00:00
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.entrance_light_panel
+    data:
+      transition: 2
+      brightness_pct: 100
+      color_temp: 153
+  mode: single
+- id: set_lights_to_white_orange
+  alias: Set Lights to White/Orange
+  description: Set lights to white or orange based on the input select.
+  trigger:
+  - platform: state
+    entity_id: input_select.light_color_mode
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.light_color_mode
+        state: White
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: group.countertoplights
+        data:
+          color_temp: 153
+          brightness: 255
+      - delay: 00:00:02
+      - service: light.turn_on
+        target:
+          entity_id:
+          - group.dininglights
+          - group.fridgearealights
+        data:
+          color_temp: 153
+          brightness: 255
+      - delay: 00:00:02
+    - conditions:
+      - condition: state
+        entity_id: input_select.light_color_mode
+        state: Orange
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: group.countertoplights
+        data:
+          color_temp: 153
+          brightness: 255
+      - delay: 00:00:02
+      - service: light.turn_on
+        target:
+          entity_id:
+          - group.dininglights
+          - group.fridgearealights
+        data:
+          color_temp: 153
+          brightness: 100
+      - delay: 00:00:02
+  mode: single
+- id: alert_on_kitchen_presence
+  alias: Alert on Kitchen Presence in Alert Mode
+  description: Triggers an alert in the application if movement is detected in the
+    kitchen while in Alert Mode. All lights will blink.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_kitchen_dining
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_select.user_mode
+    state: Alert
+  action:
+  - service: persistent_notification.create
+    data:
+      title: Alert Mode Activated
+      message: Movement detected in the kitchen during Alert Mode!
+  - service: light.turn_on
+    target:
+      entity_id:
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
+    data:
+      brightness: 255
+      flash: short
+  - delay: 00:00:02
+  - service: light.turn_off
+    target:
+      entity_id:
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
+  - delay: 00:00:02
+  mode: single
+- id: my_test_id
+  alias: Send Test Notification
+  trigger:
+  - platform: event
+    event_type: input_button.press
+    event_data:
+      entity_id: input_button.test_notification
+  action:
+  - service: persistent_notification.create
+    data:
+      message: This is a test notification from your Home Assistant!
+      title: Test Notification
+- id: google_home_alert_and_presence_detection
+  alias: Alert for Movement or Google Home Button
+  trigger:
+  - platform: state
+    entity_id: input_button.google_home_alert_button
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_kitchen_dining
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_select.user_mode
+    state: Alert
+  action:
+  - service: tts.google_translate_say
+    entity_id: media_player.bedroom_speaker
+    data:
+      message: Alert! Someone's moving downstairs. Please check.
+  - delay: 00:00:03
+  - service: tts.google_translate_say
+    entity_id: media_player.bedroom_speaker
+    data:
+      message: Hey! Don't forget, someone's downstairs!
+  - repeat:
+      count: 5
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+          - group.countertoplights
+          - group.dininglights
+          - group.fridgearealights
+        data:
+          flash: short
+      - delay: 00:00:02
+      - service: light.turn_off
+        target:
+          entity_id:
+          - group.countertoplights
+          - group.dininglights
+          - group.fridgearealights
+          - light.entrance_light_panel
+      - delay: 00:00:02
+  mode: single
+- id: set_alert_mode_at_midnight
+  alias: Set Alert Mode at Midnight
+  trigger:
+  - platform: time
+    at: 00:00:00
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.user_mode
+    data:
+      option: Alert
+  mode: single
+- id: set_normal_mode_after_sunrise
+  alias: Set Normal Mode After Sunrise
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: -02:00:00
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.user_mode
+    data:
+      option: Regular
+  mode: single
+- alias: Play fajr Azan
+  trigger:
+  - platform: time
+    at:
+    - sensor.islamic_prayer_times_fajr_prayer
+  action:
+  - service: media_player.volume_set
+    target:
+      entity_id: media_player.bedroom_speaker
+    data:
+      volume_level: 0.3
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.bedroom_speaker
+    data:
+      media_content_id: /local/azaan/azaan_fajr.mp3
+      media_content_type: music
+  id: 1756a8dab994499490c9eac317e0d806
+- alias: Play Azan other than fajr
+  trigger:
+  - platform: time
+    at:
+    - sensor.islamic_prayer_times_dhuhr_prayer
+    - sensor.islamic_prayer_times_asr_prayer
+    - sensor.islamic_prayer_times_isha_prayer
+    - sensor.islamic_prayer_time_maghrib
+  action:
+  - service: media_player.volume_set
+    target:
+      entity_id: media_player.bedroom_speaker
+    data:
+      volume_level: 0.6
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.bedroom_speaker
+    data:
+      media_content_id: /local/azaan/azaan.mp3
+      media_content_type: music
+  id: fb8ad06e366f479486003cfc7a04d1b5
+- id: front_gate_open_action
+  alias: Front Gate Open Action
+  description: Turns on the front panel light when the front gate is opened during
+    the night.
+  triggers:
+  - entity_id:
+    - binary_sensor.front_gate_sensor_opening
+    from: 'off'
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -01:00:00
+  actions:
+  - target:
+      entity_id: light.entrance_light_panel
+    data:
+      transition: 2
+      brightness_pct: 100
+      color_temp: 153
+    action: light.turn_on
+  - action: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Someone at the door
+  mode: single
+- id: turn_on_kitchen_countertop_lights_on_presence
+  alias: Turn On Kitchen and Countertop Lights on Presence
+  description: Turns on the kitchen and countertop lights to 50% brightness if the
+    dining presence sensor detects occupancy, the time is before sunrise and after
+    sunset, and the user mode is not "Alert".
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_kitchen_dining
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -01:00:00
+  - condition: state
+    entity_id: input_select.user_mode
+    state: Regular
+  - condition: state
+    entity_id: group.countertoplights, group.dininglights
+    state: 'off'
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: group.dininglights
+    data:
+      brightness_pct: 50
+      transition: 2
+      color_temp: 153
+  - service: light.turn_on
+    target:
+      entity_id: group.countertoplights
+    data:
+      brightness_pct: 50
+      transition: 2
+      color_temp_kelvin: 6536
+  mode: single
+- id: auto_turn_off_plug_when_charged
+  alias: Auto Turn Off Plug When Device Fully Charged
+  description: Turns off the smart plug 5 seconds after power usage drops to 2W or
+    less.
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.living_room_plug_power
+    below: 2
+    for:
+      seconds: 5
+  condition:
+  - condition: state
+    entity_id: switch.living_room_plug
+    state: 'on'
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.living_room_plug
+  - service: logbook.log
+    data:
+      name: Smart Plug
+      message: Turned off because power dropped below 2W.
+  mode: single
+- id: 5672d1b007aa4639af2d2733277e5c55
+  alias: Turn off timer_plug after 1 minute
+  trigger:
+  - platform: state
+    entity_id: switch.timer_plug
+    to: 'on'
+  action:
+  - delay: 00:01:00
+  - service: switch.turn_off
+    target:
+      device_id: de990ce5f7f032ec8ee7cca7b9d233db
+  mode: single

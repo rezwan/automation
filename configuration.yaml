@@ -1,0 +1,115 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Automations, scripts, and scenes
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Define groups for easier management
+group:
+  livingblinds:
+    name: Living Blinds Group
+    entities:
+      - cover.living_blind_1
+      - cover.living_blind_2
+      - cover.living_blind_3
+
+  countertoplights:
+    name: Countertop Lights Group
+    entities:
+      - light.countertop_light1
+      - light.countertop_light2
+      - light.countertop_light3
+      - light.countertop_light4
+
+  dininglights:
+    name: Dining Lights Group
+    entities:
+      - light.dining_light1
+      - light.dining_light2
+      - light.dining_light3
+
+  fridgearealights:
+    name: Fridge Area Lights Group
+    entities:
+      - light.fridgearea_light1
+      - light.fridgearea_light2
+      - light.fridgearea_light3
+
+  presence_sensors:
+    name: Presence Sensors
+    entities:
+      - binary_sensor.presence_sensor_kitchen_dining
+      - binary_sensor.presence_sensor_cookingarea
+      - binary_sensor.presence_sensor_dining
+      - binary_sensor.presence_sensor_hallway
+      
+input_select:
+  user_mode:
+   name: User Mode
+   options:
+     - Regular
+     - Alert
+   initial: Regular
+   icon: mdi:account
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 100.64.0.0/10  # Tailscale subnet
+    - 127.0.0.1
+  server_host: 0.0.0.0
+
+    
+input_button:
+  test_notification:
+    name: "Test Notification"
+    icon: mdi:bell-ring
+    
+  google_home_alert_button:
+    name: Alert Button
+
+input_boolean:
+  test_azan:
+    name: Test Azan
+    initial: off
+    icon: mdi:play
+
+template:
+  - sensor:
+      - name: "Blind 1 Battery Level"
+        unique_id: blind_1_battery_level
+        state: "{{ states('sensor.living_blind_1_battery') }}"
+        unit_of_measurement: "%"
+        device_class: battery
+
+      - name: "Blind 2 Battery Level"
+        unique_id: blind_2_battery_level
+        state: "{{ states('sensor.living_blind_2_battery') }}"
+        unit_of_measurement: "%"
+        device_class: battery
+
+      - name: "Blind 3 Battery Level"
+        unique_id: blind_3_battery_level
+        state: "{{ states('sensor.living_blind_3_battery') }}"
+        unit_of_measurement: "%"
+        device_class: battery
+tts:
+  - platform: google_translate
+    language: 'en'
+    
+# Include customizations for entities
+homeassistant:
+  customize: !include customize.yaml
+  auth_providers:
+    - type: homeassistant
+    - type: trusted_networks
+      trusted_networks:
+        - 127.0.0.1
+        - 100.64.0.0/10
+      allow_bypass_login: true
