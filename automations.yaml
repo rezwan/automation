@@ -1,6 +1,6 @@
 - id: close_blinds_remote
   alias: Close Blinds with Remote
-  description: Closes the blinds when the remote button is short pressed.
+  description: Closes the blin inds when the remote button is short pressed.
   trigger:
   - device_id: 8e45d0e26a5c7cdac0dc3e67dae770c2
     domain: zha
@@ -64,16 +64,16 @@
   - condition: sun
     before: sunrise
     after: sunset
-    after_offset: "-00:30:00"
+    after_offset: -01:00:00
   action:
   - service: light.turn_off
     target:
       entity_id:
-      - group.countertopLights
-      - group.diningLights
-      - group.fridgeAreaLights
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
     data:
-      transition: 2
+      transition: 3
   mode: single
 - id: adjust_dining_fridgearea_brightness_based_on_presence
   alias: Adjust Dining and Fridge Area Brightness Based on Dining Presence
@@ -88,7 +88,7 @@
     - condition: sun
       before: sunrise
       after: sunset
-      after_offset: "-00:30:00"
+      after_offset: -01:00:00
   action:
   - choose:
     - conditions:
@@ -99,10 +99,10 @@
       - service: light.turn_on
         target:
           entity_id:
-          - group.diningLights
-          - group.fridgeAreaLights
+          - group.dininglights
+          - group.fridgearealights
         data:
-          brightness_pct: 100
+          brightness: 255
           transition: 2
           color_temp: 153
     - conditions:
@@ -113,13 +113,12 @@
       - service: light.turn_on
         target:
           entity_id:
-          - group.diningLights
-          - group.fridgeAreaLights
+          - group.dininglights
+          - group.fridgearealights
         data:
-          brightness_pct: 50
+          brightness: 100
           transition: 2
-          color_temp: 153
-  mode: single
+          hs_color: 153
 - id: adjust_light_brightness_kitchen_presence
   alias: Adjust Light Brightness Based on Kitchen Presence
   description: Adjusts the brightness of the lights based on presence in the kitchen
@@ -128,16 +127,12 @@
   - entity_id: binary_sensor.presence_sensor_cookingarea
     trigger: state
   conditions:
-  - condition: state
-    entity_id: binary_sensor.presence_sensor_kitchen_dining
-    state: 'on'
   - condition: or
     conditions:
     - condition: sun
       before: sunrise
       after: sunset
-      after_offset: "-00:30:00"
-      
+      after_offset: -01:00:00
   actions:
   - choose:
     - conditions:
@@ -146,11 +141,18 @@
         state: 'on'
       sequence:
       - target:
-          entity_id: group.countertopLights
+          entity_id:
+          - light.countertop_light1
+          - light.countertop_light2
+          - light.countertop_light3
+          - light.countertop_light4
         data:
-          brightness_pct: 100
           transition: 2
-          color_temp: 153
+          brightness: 255
+          rgb_color:
+          - 255
+          - 245
+          - 230
         action: light.turn_on
     - conditions:
       - condition: state
@@ -158,11 +160,18 @@
         state: 'off'
       sequence:
       - target:
-          entity_id: group.countertopLights
+          entity_id:
+          - light.countertop_light1
+          - light.countertop_light2
+          - light.countertop_light3
+          - light.countertop_light4
         data:
-          brightness_pct: 50
           transition: 2
-          color_temp: 153
+          brightness: 80
+          rgb_color:
+          - 250
+          - 240
+          - 220
         action: light.turn_on
   mode: single
 - id: turn_off_entrance_light_panel
@@ -179,36 +188,35 @@
   - condition: sun
     before: sunrise
     after: sunset
-    after_offset: "-00:30:00"
+    after_offset: -01:00:00
   action:
   - service: light.turn_off
     target:
-      entity_id: light.entrace_light_panel
+      entity_id: light.entrance_light_panel
     data:
       transition: 2
   mode: single
 - id: turn_on_entrance_light_panel
   alias: Turn On Entrance Light Panel
   description: Turn on entrance light panel.
-  triggers:
-  - entity_id:
-    - binary_sensor.presence_sensor_hallway
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.presence_sensor_hallway
     from: 'off'
     to: 'on'
-    trigger: state
-  conditions:
+  condition:
   - condition: sun
     before: sunrise
     after: sunset
-    after_offset: "-00:30:00"
-  actions:
-  - target:
-      entity_id: light.entrace_light_panel
+    after_offset: -01:00:00
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.entrance_light_panel
     data:
       transition: 2
       brightness_pct: 100
       color_temp: 153
-    action: light.turn_on
   mode: single
 - id: set_lights_to_white_orange
   alias: Set Lights to White/Orange
@@ -225,19 +233,19 @@
       sequence:
       - service: light.turn_on
         target:
-          entity_id: group.countertopLights
+          entity_id: group.countertoplights
         data:
           color_temp: 153
-          brightness: 100
+          brightness: 255
       - delay: 00:00:02
       - service: light.turn_on
         target:
           entity_id:
-          - group.diningLights
-          - group.fridgeAreaLights
+          - group.dininglights
+          - group.fridgearealights
         data:
           color_temp: 153
-          brightness: 100
+          brightness: 255
       - delay: 00:00:02
     - conditions:
       - condition: state
@@ -246,16 +254,16 @@
       sequence:
       - service: light.turn_on
         target:
-          entity_id: group.countertopLights
+          entity_id: group.countertoplights
         data:
           color_temp: 153
-          brightness: 100
+          brightness: 255
       - delay: 00:00:02
       - service: light.turn_on
         target:
           entity_id:
-          - group.diningLights
-          - group.fridgeAreaLights
+          - group.dininglights
+          - group.fridgearealights
         data:
           color_temp: 153
           brightness: 100
@@ -282,19 +290,19 @@
   - service: light.turn_on
     target:
       entity_id:
-      - group.countertopLights
-      - group.diningLights
-      - group.fridgeAreaLights
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
     data:
-      brightness_pct: 100
+      brightness: 255
       flash: short
   - delay: 00:00:02
   - service: light.turn_off
     target:
       entity_id:
-      - group.countertopLights
-      - group.diningLights
-      - group.fridgeAreaLights
+      - group.countertoplights
+      - group.dininglights
+      - group.fridgearealights
   - delay: 00:00:02
   mode: single
 - id: my_test_id
@@ -338,19 +346,19 @@
       - service: light.turn_on
         target:
           entity_id:
-          - group.countertopLights
-          - group.diningLights
-          - group.fridgeAreaLights
+          - group.countertoplights
+          - group.dininglights
+          - group.fridgearealights
         data:
           flash: short
       - delay: 00:00:02
       - service: light.turn_off
         target:
           entity_id:
-          - group.countertopLights
-          - group.diningLights
-          - group.fridgeAreaLights
-          - light.entrace_light_panel
+          - group.countertoplights
+          - group.dininglights
+          - group.fridgearealights
+          - light.entrance_light_panel
       - delay: 00:00:02
   mode: single
 - id: set_alert_mode_at_midnight
@@ -402,8 +410,8 @@
     at:
     - sensor.islamic_prayer_times_dhuhr_prayer
     - sensor.islamic_prayer_times_asr_prayer
-    - sensor.islamic_prayer_times_maghrib_prayer
     - sensor.islamic_prayer_times_isha_prayer
+    - sensor.islamic_prayer_time_maghrib
   action:
   - service: media_player.volume_set
     target:
@@ -417,8 +425,6 @@
       media_content_id: /local/azaan/azaan.mp3
       media_content_type: music
   id: fb8ad06e366f479486003cfc7a04d1b5
-
-  
 - id: front_gate_open_action
   alias: Front Gate Open Action
   description: Turns on the front panel light when the front gate is opened during
@@ -433,10 +439,10 @@
   - condition: sun
     before: sunrise
     after: sunset
-    after_offset: "-00:30:00"
+    after_offset: -01:00:00
   actions:
   - target:
-      entity_id: light.entrace_light_panel
+      entity_id: light.entrance_light_panel
     data:
       transition: 2
       brightness_pct: 100
@@ -461,45 +467,64 @@
   - condition: sun
     before: sunrise
     after: sunset
-    after_offset: "-00:30:00"
+    after_offset: -01:00:00
   - condition: state
     entity_id: input_select.user_mode
     state: Regular
   - condition: state
-    entity_id: group.countertopLights, group.diningLights
+    entity_id: group.countertoplights, group.dininglights
     state: 'off'
   action:
   - service: light.turn_on
     target:
-      entity_id:
-      - group.countertopLights
-      - group.diningLights
+      entity_id: group.dininglights
     data:
       brightness_pct: 50
       transition: 2
       color_temp: 153
+  - service: light.turn_on
+    target:
+      entity_id: group.countertoplights
+    data:
+      brightness_pct: 50
+      transition: 2
+      color_temp_kelvin: 6536
   mode: single
-
 - id: auto_turn_off_plug_when_charged
   alias: Auto Turn Off Plug When Device Fully Charged
-  description: Turns off the smart plug 5 seconds after power usage drops to 2W or less.
+  description: Turns off the smart plug 5 seconds after power usage drops to 2W or
+    less.
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.living_room_plug_power
-      below: 2
-      for:
-        seconds: 5
+  - platform: numeric_state
+    entity_id: sensor.living_room_plug_power
+    below: 2
+    for:
+      seconds: 5
   condition:
-    - condition: state
-      entity_id: switch.living_room_plug
-      state: 'on'
+  - condition: state
+    entity_id: switch.living_room_plug
+    state: 'on'
   action:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.living_room_plug
-    - service: logbook.log
-      data:
-        name: "Smart Plug"
-        message: "Turned off because power dropped below 2W."
+  - service: switch.turn_off
+    target:
+      entity_id: switch.living_room_plug
+  - service: logbook.log
+    data:
+      name: Smart Plug
+      message: Turned off because power dropped below 2W.
   mode: single
   
+- id: '1750286392413'
+  alias: New automation test
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - event.entryway_camera_motion
+  conditions: []
+  actions:
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: Hey someone is there
+  mode: single
