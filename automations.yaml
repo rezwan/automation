@@ -593,14 +593,13 @@
   trigger:
     - platform: state
       entity_id: binary.living_room_presence
+      from: "off"
       to: "on"
   condition:
-    - condition: or
-      conditions:
-        - condition: sun
-          after: sunset
-        - condition: sun
-          before: sunrise
+    - condition: sun
+      before: sunrise
+      after: sunset
+      after_offset: -01:00:00
   action:
     - service: light.turn_on
       target:
