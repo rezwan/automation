@@ -592,7 +592,7 @@
   description: Turns on living room lights if presence is detected after sunset or before sunrise.
   trigger:
     - platform: state
-      entity_id: binary.living_room_presence
+      entity_id: binary_sensor.living_room_presence
       from: "off"
       to: "on"
   condition:
@@ -619,7 +619,7 @@
   description: Turns off living room lights if no presence is detected after sunset or before sunrise.
   trigger:
     - platform: state
-      entity_id: binary.living_room_presence
+      entity_id: binary_sensor.living_room_presence
       to: "off"
       for:
         seconds: 3
